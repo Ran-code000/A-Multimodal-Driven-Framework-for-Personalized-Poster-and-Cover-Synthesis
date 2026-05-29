@@ -1,0 +1,420 @@
+=== PAGE 1 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+图文驱动的个性化海报与封面生成系统
+多模态大模型原理与应用·课程大作业开题报告
+姓名：崔敬然
+学号：23336055
+班级：1 班
+摘
+要：面向海报与封面设计领域对自动化、个性化生成的需求，本课题提出并实现一个图文驱动的个性化海报与
+封面生成系统。该系统接收文本描述、布局草图与风格参考图三种模态输入，通过SDXL 扩散模型、ControlNet 布
+局控制与IP-Adapter 风格迁移的协同架构，实现文本+ 布局+ 风格三模态协同可控的高质量图像生成。系统采用模
+块化流水线设计，包含LLM 提示词增强、Canny 边缘布局提取、多条件扩散生成与Gradio 交互界面等核心模块。为
+验证多模态控制的有效性，设计4 组对照实验，采用CLIP Score、简化FID 与主观评分等多维评测指标。本课题在
+16GB 消费级GPU 上实现全流程部署，预期产出完整的个性化海报生成系统及定量评测报告。
+1
+任务定义与应用背景
+1.1
+任务定义
+本课题旨在构建一个图文驱动的个性化海报与封面生成系统，核心任务为：给定用户输入的文本描述（海
+报主题）、布局草图（构图参考）与风格参考图（画风/色彩参考），利用多模态大模型技术自动生成高质量、可
+控的海报与封面图像。
+具体而言，系统接收三类模态输入：
+1. 文本模态：用户以自然语言描述海报主题、内容要素与氛围（如“科技风春季校招主视觉海报”）。系统通
+过大语言模型（DeepSeek）对原始输入进行提示词增强，将其转化为富含艺术术语与构图描述的SDXL
+级高质量提示词。
+2. 布局模态：用户可手绘或上传简易草图，系统通过ControlNet-Canny 边缘检测提取结构信息，以弱约束
+方式引导生成图像的构图布局。
+3. 风格模态：用户上传风格参考图像（如某幅画作、某张海报），系统通过IP-Adapter 提取其视觉风格特征
+并注入生成过程，实现对色彩调性、纹理肌理的可控迁移。
+图1展示了系统的多模态输入输出范式。
+文本提示词
+(Prompt)
+布局草图
+(Layout Sketch)
+风格参考图
+(Style Reference)
+多模态生成系统
+(SDXL+CN+IP-Adapter)
+个性化海报/封面
+图1: 系统多模态输入输出范式
+1.2
+应用背景与挑战
+海报与封面设计是视觉传达的核心场景。传统设计流程依赖专业设计师手工制作，周期长、成本高且难以
+规模化。随着AIGC 技术的快速发展，基于扩散模型的文生图技术为自动化海报生成提供了新范式。然而，现
+有方案面临以下关键挑战：
+1. 构图不可控：纯文本驱动的SDXL 生成结果构图随机性强，无法满足海报设计对版面结构的精确需求。
+2. 风格不可控：色彩调性、纹理风格难以通过文本精确描述，生成结果与预期画风偏差大。
+3. 细节崩坏：人物面部、文字区域等高频细节易出现扭曲变形，商业可用性不足。
+4. 多模态对齐困难：文本、布局、风格三种异构模态如何在潜在空间中有效融合，是多模态生成的核心难
+题。
+本课题通过SDXL+ControlNet+IP-Adapter 的协同架构，首次将布局控制与风格迁移统一于个性化海报生
+成任务，为上述挑战提供系统化解决方案。
+2
+相关工作调研
+本节调研与本文密切相关的五类代表性工作，总结其核心贡献与局限性，并明确本文的创新定位。
+1
+
+=== PAGE 2 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+2.1
+Stable Diffusion XL (SDXL)
+SDXL[1] 是目前最先进的开源文生图基础模型之一。相比SD 1.5/2.1，SDXL 将参数量提升至2.6B UNet +
+两个文本编码器（CLIP ViT-L 与OpenCLIP ViT-bigG），支持1024×1024 原生分辨率生成，显著提升了图像质量
+与文本-图像对齐能力。SDXL 的开放生态使其成为构建个性化生成系统的理想基座。然而，SDXL 作为通用文
+生图模型，缺乏对布局和风格的显式控制能力。
+2.2
+ControlNet
+ControlNet[2] 提出了一种可插拔的神经网络架构，通过复制Stable Diffusion UNet 编码器并添加“零卷积”
+层，在保持原模型生成能力的同时，引入额外条件信号（如Canny 边缘、OpenPose 骨骼、深度图等）实现空间
+可控生成。ControlNet 的模块化设计使其可与SDXL 无缝集成，为本文的布局控制模块提供了技术基础。但其
+单一条件机制无法同时处理风格信息。
+2.3
+IP-Adapter
+IP-Adapter[3] 提出了一种轻量级图像提示适配器，通过解耦的交叉注意力机制将图像特征注入预训练扩散
+模型，实现风格/内容参考图的特征迁移。相比ControlNet 的像素级条件注入，IP-Adapter 在语义/风格层面进行
+控制，且仅增加约3% 的参数量。本文采用IP-Adapter-SDXL 版本作为风格控制的核心模块。
+2.4
+HCP-Diffusion 与个性化文生图
+HCP-Diffusion[4] 是一个面向Stable Diffusion 的微调框架，支持DreamBooth、LoRA、Textual Inversion 等
+多种个性化训练方法。在个性化海报生成领域，DreamBooth 与LoRA 被广泛用于特定风格/人物的定制化生成。
+然而，基于微调的方案需要为每种风格/主题单独训练，不适用于“零样本” 的通用海报生成场景。本文采用无
+需训练的IP-Adapter 实现零样本风格迁移。
+2.5
+文本到海报生成相关工作
+近期研究者已开始探索AI 驱动的海报生成。Text2Poster[5] 提出了基于布局预测的海报生成流水线；Poster-
+Layout[6] 关注海报元素的自动排版优化；GAN-based 方法如StyleGAN-Poster[7] 在特定领域（如电影海报）取
+得了一定效果。然而，上述工作普遍面临以下局限：
+• 扩散模型时代的技术滞后：大部分工作基于GAN 架构，生成质量低于扩散模型基线。
+• 缺少多模态协同控制：布局和风格控制通常独立进行，缺乏统一的多模态可控框架。
+• 实际部署困难：模型体量大、推理速度慢，难以在消费级GPU 上部署。
+2.6
+相关工作对比总结
+表1从布局控制、风格控制、零样本能力、消费级GPU 部署与开源五个维度对比本文与代表性工作的差异
+化定位。
+表1: 相关工作多维度对比
+方法
+布局控制
+风格控制
+零样本
+消费级GPU
+开源
+SDXL (Podell et al.)
+×
+×
+✓
+✓
+✓
+SDXL + ControlNet
+✓
+×
+✓
+✓
+✓
+SDXL + IP-Adapter
+×
+✓
+✓
+✓
+✓
+Text2Poster (Yang et al.)
+✓
+×
+✓
+×
+×
+DreamBooth / LoRA
+×
+✓
+×
+✓
+✓
+本文方法(三模态协同)
+✓
+✓
+✓
+✓
+✓
+3
+本文创新点与贡献
+基于上述调研与对比分析，本文的主要创新点与贡献为：
+1. 首次将ControlNet 布局控制与IP-Adapter 风格迁移统一整合至SDXL 海报生成框架，实现文本+ 布局
++ 风格三模态协同可控生成，填补了现有工作在布局与风格联合控制上的空白。
+2. 提出弱约束控制策略：通过降低ControlNet 权重至0.15–0.20 范围，在保持构图引导的同时保留SDXL 的
+艺术创造力，实验验证了弱约束策略在构图控制与艺术自由度之间的最优平衡。
+2
+
+=== PAGE 3 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+3. 全流程消费级GPU 适配：通过模型CPU 卸载、VAE 切片/瓦片、float16 精度等优化策略，在16GB VRAM
+的消费级GPU 上实现稳定推理，显著降低了多模态海报生成系统的部署门槛。
+4
+系统方案设计
+4.1
+系统架构
+本系统采用模块化流水线架构，如图2所示，包含五个核心模块：提示词增强、布局控制、风格控制、扩散
+生成与交互界面。
+用户输入
+(主题/草图/参考图)
+LLM 提示词增强
+(DeepSeek API)
+布局提取
+(Canny 边缘检测)
+风格参考
+(Style Reference)
+文本编码
+(CLIP+OpenCLIP)
+ControlNet
+(布局条件)
+IP-Adapter
+(风格条件)
+SDXL UNet
+(扩散去噪核心)
+VAE 解码→生成海报
+Gradio
+交互界面
+图2: 系统整体架构图
+4.2
+模型选型
+表2: 核心模型选型与技术参数
+组件
+模型/方案
+关键参数
+基座模型
+SDXL Base 1.0
+2.6B UNet, 1024×1024
+布局控制
+ControlNet-Canny (SDXL)
+权重0.15–0.20 (弱约束)
+风格控制
+IP-Adapter-Plus (SDXL)
+权重0.30–0.40
+提示词增强
+DeepSeek-Chat API
+temperature=0.7
+图像编码
+CLIP ViT-L + OpenCLIP
+双编码器串联
+调度器
+DPM-Solver++ (Karras)
+25–30 推理步数
+内存优化
+CPU 卸载+ VAE 切片/瓦片
+fp16, 16GB VRAM
+交互界面
+Gradio 6.x
+Web UI, 实时预览
+4.3
+评测指标设计
+本课题采用主观评测+ 客观评测结合的方式对生成质量进行全面评价。
+主观评测指标
+• 美观度(Aesthetics)：1–5 分Likert 量表。1 分= 严重失真/构图混乱；3 分= 基本可接受；5 分= 高度美观、
+色彩协调、具备商业海报品质。
+• 文本-图像符合度(Text Alignment)：1–5 分。1 分= 与提示词完全无关；3 分= 部分相关但细节缺失；5 分
+= 完美匹配提示词全部要素（物体、场景、风格、氛围）。
+3
+
+=== PAGE 4 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+客观评测指标
+• CLIP Score：使用OpenAI CLIP ViT-L/14 计算生成图像与提示词的余弦相似度，范围[0, 1]，越高表示语
+义匹配越好。定义为：
+CLIPScore(I, T) = cos(eI, eT ) =
+eI · eT
+∥eI∥∥eT ∥
+(1)
+其中eI = CLIPimg(I), eT = CLIPtext(T)。
+• 简化FID (Fréchet Inception Distance)：以CLIP 图像特征替代InceptionV3 特征，计算各实验组与基线组
+(G1) 的Fréchet 距离：
+FIDsim(A, B) = ∥µA −µB∥2 + Tr
+(
+ΣA + ΣB −2(ΣAΣB)1/2)
+(2)
+FID 越低表示两组分布越接近。
+• 美学启发式指标(Aesthetic Heuristic)：基于Canny 边缘密度+ HSV 色彩饱和度标准差加权计算，范围
+1–5：
+Haes = 1.5 + 2.0 · ρedge + 1.0 · σsat + 0.5 · σval
+(3)
+其中ρedge 为Canny 边缘像素占比，σsat, σval 分别为HSV 饱和度与明度标准差。
+4.4
+对照实验设计
+为验证多模态控制对海报生成质量的影响，设计4 组对照实验：
+表3: 对照实验设计
+实验组
+ControlNet
+IP-Adapter
+CN 权重
+IP 权重
+G1 (基线)
+×
+×
+0.0
+0.0
+G2 (仅布局)
+✓
+×
+0.18
+0.0
+G3 (仅风格)
+×
+✓
+0.0
+0.33
+G4 (完整系统)
+✓
+✓
+0.18
+0.33
+实验固定4 个测试主题：古风美人、青绿山水、赛博朋克、春日花卉，覆盖人物、风景、城市、自然四类
+视觉场景。每组使用相同随机种子(seed=42)、推理步数(25) 与CFG Scale (7.5)，确保对比公平性。
+4.5
+预期结果
+基于前期预实验，预期G4（完整系统）在CLIP Score 与主观美观度上均达到最优：ControlNet 弱约束提供
+构图引导，IP-Adapter 注入真实风格特征，两者互补而非冲突。G2 与G3 分别在构图/风格维度上优于G1 基线。
+5
+可行性分析与风险评估
+5.1
+可行性分析
+技术可行性。SDXL + ControlNet + IP-Adapter 的组合已在开源社区得到广泛验证，三者均通过HuggingFace
+Diffusers 框架提供官方集成接口，技术路线成熟。ControlNet 与IP-Adapter 的模块化设计使得条件注入与风格
+迁移可独立调试、解耦优化，降低了系统集成的技术风险。
+资源可行性。本课题基于NVIDIA RTX 5060 Ti (16GB VRAM) 消费级GPU，通过enable_model_cpu_offload、
+VAE slicing/tiling 及float16 精度等成熟优化策略，可将单张1024×1024 图像推理的显存峰值控制在12GB 以内，
+无需依赖云端算力或企业级硬件。
+进度可行性。10 周项目周期覆盖环境搭建、核心开发、多模态集成、评测实验与论文撰写五个阶段，各阶
+段任务边界清晰、可量化验收。前期预实验已完成SDXL 基座模型的本地部署与基础推理流程验证，为后续开
+发奠定了工程基础。
+5.2
+风险评估与应对策略
+表4梳理了项目面临的主要风险及相应的应对策略。
+4
+
+=== PAGE 5 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+表4: 项目风险与应对策略
+风险项
+概率
+影响
+应对策略
+模型下载失败/网
+络受限
+中
+高
+配置HuggingFace 镜像站点
+（hf-mirror.com），预下载模型至
+本地磁盘
+多条件冲突导致
+生成质量下降
+中
+中
+对ControlNet 与IP-Adapter 权
+重进行参数扫描(0.10–0.50)，确
+定最优权重区间
+推理速度不达预
+期
+低
+中
+降低推理步数至15 步，启用
+VAE tiling 与attention slicing
+主观评测人力不
+足
+低
+低
+优先保证CLIP Score 等客观指
+标，主观评测缩减至3 名评分
+者
+6
+初步数据集与实验设想
+6.1
+评测数据集
+构建一个包含4 类主题、每类4 组对照实验的评测数据集，共计16 组生成实验：
+表5: 评测数据集概览
+主题
+提示词要素
+风格参考图特征
+古风美人
+仕女、汉服、桃花、工笔、宋韵
+暖色调古典人物画
+青绿山水
+山川、河流、松树、亭台、水墨
+蓝绿色青绿山水画
+赛博朋克
+霓虹、雨夜、摩天楼、飞行器
+紫青色城市夜景
+春日花卉
+樱花、郁金香、晨光、散景、微
+距
+粉色调花卉摄影
+6.2
+算力预算与优化策略
+表6: 算力环境与优化策略
+项目
+配置/策略
+GPU
+NVIDIA RTX 5060 Ti, 16 GB VRAM
+系统内存
+32 GB DDR5
+模型精度
+float16 (全流程)
+内存优化
+enable_model_cpu_offload, VAE slicing/tiling
+推理步数
+25 步（评测）/ 15 步（调试）
+单张生成时间
+≈15–25 秒(1024×1024)
+完整评测周期
+≈5–10 分钟(16 组实验)
+6.3
+时间规划
+表7: 项目时间规划(10 周)
+阶段
+主要任务
+第一阶段
+环境搭建：PyTorch、Diffusers 安装，模型下载，HF 镜像
+配置
+第二阶段
+核心引擎开发：Engine 类实现，Gradio WebUI 搭建
+第三阶段
+多模态集成：ControlNet+IP-Adapter 联调，DeepSeek 提
+示词增强
+第四阶段
+评测实验：4 组对照实验全量运行，CLIP Score/FID 计算
+第五阶段
+论文撰写与答辩准备：开题报告定稿，PPT 制作
+5
+
+=== PAGE 6 ===
+多模态大模型原理与应用·课程大作业开题报告
+图文驱动个性化海报生成
+6.4
+预期成果
+1. 一套完整的图文驱动个性化海报/封面生成系统，包含核心引擎、Web 交互界面与评测框架。
+2. 一份包含4 组对照实验的定量评测报告，验证多模态控制的有效性。
+3. 课程大作业终期报告（含系统设计、实验分析、可视化结果、结论）。
+参考文献
+[1] D. Podell, Z. English, K. Lacey, et al. “SDXL: Improving Latent Diffusion Models for High-Resolution Image
+Synthesis,” arXiv preprint arXiv:2307.01952, 2023.
+[2] L. Zhang, A. Rao, and M. Agrawala. “Adding Conditional Control to Text-to-Image Diffusion Models,” Proceed-
+ings of the IEEE/CVF International Conference on Computer Vision (ICCV), 2023, pp. 3836–3847.
+[3] H. Ye, J. Zhang, S. Liu, et al. “IP-Adapter: Text Compatible Image Prompt Adapter for Text-to-Image Diffusion
+Models,” arXiv preprint arXiv:2308.06721, 2023.
+[4] B. Ai, Y. Zhou, Z. Chen, et al. “HCP-Diffusion:
+A Universal Stable-Diffusion Fine-tuning Framework,”
+https://github.com/7eu7d7/HCP-Diffusion, 2024.
+[5] Z. Yang, Y. Xu, and S. Liu. “Text2Poster: Laying Out Stylized Texts on Retrieved Images,” Proceedings of ICASSP,
+2022.
+[6] Y. Li, J. Wang, et al. “PosterLayout: A New Benchmark and Approach for Content-Aware Visual-Textual Presen-
+tation Layout,” Proceedings of CVPR, 2023.
+[7] T. Karras, S. Laine, and T. Aila. “A Style-Based Generator Architecture for Generative Adversarial Networks,”
+Proceedings of CVPR, 2019, pp. 4401–4410.
+[8] R. Rombach, A. Blattmann, D. Lorenz, et al. “High-Resolution Image Synthesis with Latent Diffusion Models,”
+Proceedings of CVPR, 2022, pp. 10684–10695.
+[9] C. Mou, X. Wang, L. Xie, et al. “T2I-Adapter: Learning Adapters to Dig out More Controllable Ability for Text-
+to-Image Diffusion Models,” Proceedings of AAAI, 2024.
+6
+

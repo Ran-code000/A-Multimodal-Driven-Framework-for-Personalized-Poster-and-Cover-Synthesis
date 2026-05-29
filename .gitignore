@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.bcf
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.fdb_latexmk
+*.fls
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Large model files (downloaded by huggingface)
+*.safetensors
+models/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated outputs (large files, regenerate on demand)
+test_output_text_only.png
+test_output_full_pipeline.png
+test_multi_*.png
+
+# Claude
+.claude/

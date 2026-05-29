@@ -1,0 +1,154 @@
+{
+  "metrics_table": [
+    {
+      "theme": "古风美人",
+      "theme_key": "ancient-beauty",
+      "group": "G1_TextOnly",
+      "clip_score": 0.2794,
+      "aesthetics": 1.9,
+      "use_controlnet": false,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "古风美人",
+      "theme_key": "ancient-beauty",
+      "group": "G2_ControlNet",
+      "clip_score": 0.2805,
+      "aesthetics": 1.9,
+      "use_controlnet": true,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "古风美人",
+      "theme_key": "ancient-beauty",
+      "group": "G3_IPAdapter",
+      "clip_score": 0.2602,
+      "aesthetics": 2.0,
+      "use_controlnet": false,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "古风美人",
+      "theme_key": "ancient-beauty",
+      "group": "G4_FullSystem",
+      "clip_score": 0.2541,
+      "aesthetics": 2.0,
+      "use_controlnet": true,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "青绿山水",
+      "theme_key": "green-landscape",
+      "group": "G1_TextOnly",
+      "clip_score": 0.3022,
+      "aesthetics": 2.2,
+      "use_controlnet": false,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "青绿山水",
+      "theme_key": "green-landscape",
+      "group": "G2_ControlNet",
+      "clip_score": 0.2974,
+      "aesthetics": 2.3,
+      "use_controlnet": true,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "青绿山水",
+      "theme_key": "green-landscape",
+      "group": "G3_IPAdapter",
+      "clip_score": 0.2644,
+      "aesthetics": 2.6,
+      "use_controlnet": false,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "青绿山水",
+      "theme_key": "green-landscape",
+      "group": "G4_FullSystem",
+      "clip_score": 0.2584,
+      "aesthetics": 2.6,
+      "use_controlnet": true,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "赛博朋克",
+      "theme_key": "cyberpunk",
+      "group": "G1_TextOnly",
+      "clip_score": 0.2834,
+      "aesthetics": 2.2,
+      "use_controlnet": false,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "赛博朋克",
+      "theme_key": "cyberpunk",
+      "group": "G2_ControlNet",
+      "clip_score": 0.2981,
+      "aesthetics": 2.2,
+      "use_controlnet": true,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "赛博朋克",
+      "theme_key": "cyberpunk",
+      "group": "G3_IPAdapter",
+      "clip_score": 0.2965,
+      "aesthetics": 2.3,
+      "use_controlnet": false,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "赛博朋克",
+      "theme_key": "cyberpunk",
+      "group": "G4_FullSystem",
+      "clip_score": 0.2942,
+      "aesthetics": 2.3,
+      "use_controlnet": true,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "春日花卉",
+      "theme_key": "spring-flowers",
+      "group": "G1_TextOnly",
+      "clip_score": 0.2931,
+      "aesthetics": 2.1,
+      "use_controlnet": false,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "春日花卉",
+      "theme_key": "spring-flowers",
+      "group": "G2_ControlNet",
+      "clip_score": 0.2991,
+      "aesthetics": 2.1,
+      "use_controlnet": true,
+      "use_ip_adapter": false
+    },
+    {
+      "theme": "春日花卉",
+      "theme_key": "spring-flowers",
+      "group": "G3_IPAdapter",
+      "clip_score": 0.2679,
+      "aesthetics": 2.1,
+      "use_controlnet": false,
+      "use_ip_adapter": true
+    },
+    {
+      "theme": "春日花卉",
+      "theme_key": "spring-flowers",
+      "group": "G4_FullSystem",
+      "clip_score": 0.2682,
+      "aesthetics": 2.1,
+      "use_controlnet": true,
+      "use_ip_adapter": true
+    }
+  ],
+  "fid_scores": {
+    "G1_TextOnly": 0.0,
+    "G2_ControlNet": 0.0,
+    "G3_IPAdapter": 0.0,
+    "G4_FullSystem": 0.0
+  }
+}

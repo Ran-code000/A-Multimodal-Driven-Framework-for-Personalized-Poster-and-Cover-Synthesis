@@ -3,52 +3,95 @@
 % 多模态大模型原理与应用 · 课程大作业期末结题报告
 % 图文驱动的个性化封面/海报生成系统
 % ===========================================================================
-\documentclass[11pt,a4paper]{article}
+\documentclass[12pt,a4paper]{ctexart}
 
 % ---- Fonts ----
-\usepackage[UTF8]{ctex}
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
 \setCJKmainfont{SimSun}[AutoFakeBold=2.5]
 \setCJKsansfont{SimHei}
 
+% ---- Color Palette ----
+\usepackage{xcolor}
+\definecolor{primary}{HTML}{1a3a5c}       % Dark navy — headings, cover bars, table headers
+\definecolor{secondary}{HTML}{2c6faa}     % Medium blue — subheadings, borders, links
+\definecolor{accent}{HTML}{76b900}        % Green accent — highlights, tips, cover accent
+\definecolor{lightbg}{HTML}{f0f4f8}       % Light blue-gray — box backgrounds
+\definecolor{tabhead}{HTML}{1a3a5c}       % Table header bg (= primary)
+\definecolor{tabrowb}{HTML}{e8eff5}       % Alternating table row (light blue)
+\definecolor{tabrowa}{HTML}{ffffff}       % White table row
+\definecolor{codebg}{rgb}{0.97,0.97,0.98} % Code block background
+\definecolor{warncol}{HTML}{e07b39}       % Warning orange
+\definecolor{redcol}{HTML}{d94040}        % Error red
+\definecolor{greencol}{HTML}{3a9d3a}      % Success green
+
 % ---- Page Layout ----
-\usepackage{geometry}
-\geometry{left=2.5cm,right=2.2cm,top=2.2cm,bottom=2.2cm}
+\usepackage[top=2.5cm,bottom=2.5cm,left=2.6cm,right=2.6cm,headheight=26pt]{geometry}
 \usepackage{setspace}
 \setstretch{1.1}
 \usepackage{indentfirst}
 \setlength{\parindent}{2em}
 
+% ---- Float spacing (prevent crowding) ----
+\setlength{\intextsep}{16pt plus 4pt minus 4pt}
+\setlength{\floatsep}{14pt plus 3pt minus 3pt}
+\setlength{\textfloatsep}{16pt plus 4pt minus 4pt}
+
 % ---- Packages ----
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
-\usepackage{multirow}
+\usepackage{array,multirow,tabularx}
+\usepackage{colortbl}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
 \usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds, calc}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,backgrounds,shapes.geometric,fit}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{xcolor}
-\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue]{hyperref}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=secondary]{hyperref}
 \usepackage{listings}
-\usepackage{array}
-\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ---- Bibliography ----
 \usepackage[backend=biber,style=gb7714-2015,sorting=none]{biblatex}
 \addbibresource{refs.bib}
 
-% ---- Code listing ----
-\lstset{
-    basicstyle=\ttfamily\scriptsize,
+% ---- Hyperref ----
+\hypersetup{hidelinks}
+
+% ---- Section title colors ----
+\titleformat{\section}
+    {\color{primary}\normalfont\LARGE\bfseries}
+    {\color{primary}\thesection}{0.8em}{}
+\titleformat{\subsection}
+    {\color{secondary}\normalfont\Large\bfseries}
+    {\color{secondary}\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}
+    {\color{primary}\normalfont\large\bfseries}
+    {\color{primary}\thesubsubsection}{0.6em}{}
+
+% ---- Code listing style ----
+\definecolor{codegreen}{rgb}{0.1,0.6,0.1}
+\definecolor{codegray}{rgb}{0.45,0.45,0.45}
+\definecolor{codepurple}{rgb}{0.5,0,0.5}
+
+\lstdefinestyle{pycode}{
+    backgroundcolor=\color{codebg},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{secondary}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
     breaklines=true,
-    frame=single,
-    numbers=left,
-    numbersep=4pt,
-    numberstyle=\tiny\color{gray},
-    backgroundcolor=\color{gray!5},
+    captionpos=b,
+    numbers=left,numbersep=6pt,
+    frame=single,framerule=0.5pt,rulecolor=\color{codegray!50},
+    language=Python,
     columns=flexible,
     tabsize=2,
     xleftmargin=4pt,
@@ -57,57 +100,93 @@
     belowskip=4pt,
 }
 
-% ---- Title Formatting ----
-\usepackage{titlesec}
-\titleformat{\section}{\centering\Large\bfseries}{\thesection}{1em}{}
-\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
-\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{1em}{}
+% ---- Info boxes (3 types) ----
+\newtcolorbox{keybox}[1][]{
+    colback=lightbg,colframe=secondary,coltitle=white,
+    fonttitle=\bfseries,title={\textbf{>}\enspace#1},
+    sharp corners,boxrule=0.8pt,
+    left=3mm,right=3mm,top=2mm,bottom=2mm
+}
+\newtcolorbox{warnbox}{
+    colback=redcol!5,colframe=redcol!60,
+    sharp corners,boxrule=0.5pt,
+    left=3mm,right=3mm,top=1.5mm,bottom=1.5mm
+}
+\newtcolorbox{tipbox}{
+    colback=accent!8,colframe=accent!60,
+    sharp corners,boxrule=0.5pt,
+    left=3mm,right=3mm,top=1.5mm,bottom=1.5mm
+}
 
 % ---- Caption Names ----
 \renewcommand{\figurename}{\textbf{图}}
 \renewcommand{\tablename}{\textbf{表}}
 
-% ---- Header/Footer ----
-\setlength{\headheight}{15pt}
+% ---- Page headers/footers ----
+\setlength{\headheight}{16pt}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small 多模态大模型原理与应用·期末结题报告}
-\fancyhead[R]{\small 图文驱动个性化封面/海报生成}
-\fancyfoot[C]{\thepage}
+\fancyhead[L]{\color{secondary}\small 多模态大模型原理与应用·期末结题报告}
+\fancyhead[R]{\color{secondary}\small 图文驱动个性化封面/海报生成}
+\fancyfoot[C]{\color{secondary}\small\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{secondary}\leaders\hrule height \headrulewidth\hfill}}
 
 % ---- Custom commands ----
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
 
-% ---- Title ----
-\title{}
-\author{}
-\date{}
+% ---- Empty title (custom cover page) ----
+\title{}\author{}\date{}
 
 \begin{document}
 
 % ============================================================
-% 封面（居中）
+% 封面
 % ============================================================
 \begin{titlepage}
-\centering
-\vspace*{\fill}
+\thispagestyle{empty}
 
-{\heiti\huge 图文驱动的个性化封面与海报生成系统}
+% Top accent bars
+\begin{tikzpicture}[remember picture,overlay]
+    \fill[primary] (current page.north west) rectangle
+        ([yshift=-0.6cm]current page.north east);
+    \fill[accent] (current page.north west) rectangle
+        ([yshift=-0.65cm]current page.north east);
+\end{tikzpicture}
 
-\vspace{20pt}
+\vspace*{2.5cm}
 
-{\songti\Large 多模态大模型原理与应用·课程大作业期末结题报告}
+\begin{center}
+    {\color{primary}\fontsize{28}{34}\bfseries 图文驱动的个性化封面\\[8pt]与海报生成系统}\\[14pt]
+    {\color{secondary}\fontsize{16}{20}\bfseries 多模态大模型原理与应用·课程大作业期末结题报告}
+\end{center}
 
-\vspace{48pt}
+\vspace{1.2cm}
+\begin{center}\color{secondary}\rule{0.5\textwidth}{0.8pt}\end{center}
+\vspace{1.2cm}
 
-{\songti\large
-姓名：崔敬然 \\[6pt]
-学号：23336055 \\[6pt]
-班级：1班
-}
+% Info card
+\begin{center}
+\begin{tikzpicture}
+    \node[draw=secondary,fill=lightbg,rounded corners=4pt,
+          inner sep=18pt,text width=8.5cm,align=center] {
+        {\large\bfseries\color{primary} 崔敬然}\\[4pt]
+        {\color{secondary} 学号：23336055}\\[2pt]
+        {\color{secondary} 班级：1班}\\[6pt]
+        {\color{accent}\today}
+    };
+\end{tikzpicture}
+\end{center}
 
-\vfill\vspace*{0pt}
+\vspace{1cm}
+
+% Bottom accent bars
+\begin{tikzpicture}[remember picture,overlay]
+    \fill[accent] (current page.south west) rectangle
+        ([yshift=0.65cm]current page.south east);
+    \fill[primary] (current page.south west) rectangle
+        ([yshift=0.6cm]current page.south east);
+\end{tikzpicture}
 \end{titlepage}
 
 \thispagestyle{fancy}
@@ -116,12 +195,13 @@
 % 中文摘要（单独成页）
 % ============================================================
 \newpage
-\thispagestyle{plain}
-\vspace*{0pt}\vfill
+\thispagestyle{empty}
+\vspace*{4cm}
 \begin{center}
-{\heiti\Large 摘\quad 要}
+{\color{primary}\LARGE\bfseries 摘\quad 要}\\[14pt]
+\color{secondary}\rule{0.35\textwidth}{0.6pt}
 \end{center}
-\vspace{18pt}
+\vspace{1.2cm}
 \begin{minipage}{0.88\textwidth}
 \normalsize
 随着生成式人工智能技术的快速发展，基于扩散模型的文本到图像生成已取得显著突破，然而在个性化海报与封面设计等应用中，纯文本驱动方案仍面临构图不可控、风格不可控、细节崩坏及多模态异构信息融合困难等挑战。本文提出了一种图文驱动的多模态个性化海报与封面生成框架，以Stable Diffusion XL（SDXL）为基座模型，整合ControlNet-Canny布局条件控制和IP-Adapter风格图像提示适配，通过文本描述、布局草图与风格参考图三种模态的协同输入，实现高质量可控的个性化视觉内容合成。系统采用模块化流水线架构，包含LLM提示词增强、Canny边缘检测、ControlNet弱约束布局注入、IP-Adapter跨注意力风格迁移与SDXL扩散去噪五大核心模块。面向消费级16\,GB显存GPU，通过模型CPU卸载、VAE切片与瓦片编码、float16精度等组合优化策略，在NVIDIA RTX 5060 Ti上实现了1024$\times$1024分辨率海报的稳定推理，单张生成时间约15--25秒。实验设计四组对照覆盖古风美人、青绿山水、赛博朋克与春日花卉四类视觉主题，以CLIP Score、简化FID和美学启发式指标进行定量评估。结果表明，完整多模态系统G4在CLIP Score上相比G1基线提升约12\%，在美学启发式指标上提升约25\%，验证了布局控制与风格控制的协同增益效应。本文为消费级GPU上多模态可控海报生成提供了从理论设计到工程部署的完整实践方案。
@@ -135,12 +215,13 @@
 % 英文摘要（单独成页）
 % ============================================================
 \newpage
-\thispagestyle{plain}
-\vspace*{0pt}\vfill
+\thispagestyle{empty}
+\vspace*{4cm}
 \begin{center}
-{\Large\bfseries Abstract}
+{\color{primary}\LARGE\bfseries Abstract}\\[14pt]
+\color{secondary}\rule{0.35\textwidth}{0.6pt}
 \end{center}
-\vspace{18pt}
+\vspace{1.2cm}
 \begin{minipage}{0.88\textwidth}
 \normalsize
 Recent advances in diffusion-based text-to-image generation have enabled high-quality image synthesis, yet purely text-driven approaches still face critical challenges in personalized poster and cover design, including uncontrollable composition, inconsistent style transfer, and ineffective multimodal fusion. This paper proposes an image-text driven multimodal framework for personalized poster and cover synthesis, built upon Stable Diffusion XL (SDXL) and integrating ControlNet-Canny for layout conditioning and IP-Adapter for style-aware image prompting. The modular pipeline comprises five components: LLM-based prompt enhancement, Canny edge detection, ControlNet weak-constraint layout injection, IP-Adapter cross-attention style transfer, and SDXL denoising generation. Targeting 16\,GB VRAM consumer GPUs, the system achieves stable 1024$\times$1024 poster generation on an NVIDIA RTX 5060 Ti within 15--25 seconds per image. Four controlled experiments across four themes demonstrate that the full multimodal system G4 improves CLIP Score by approximately 12\% and aesthetic score by approximately 25\% over the text-only baseline, validating the complementary synergy between layout and style control. This work provides a complete practical solution from theoretical design to engineering deployment for multimodal controllable poster generation on consumer-grade GPUs.
@@ -154,12 +235,13 @@ Recent advances in diffusion-based text-to-image generation have enabled high-qu
 % 目录（单独成页）
 % ============================================================
 \newpage
-\thispagestyle{plain}
-\vspace*{0pt}\vfill
+\thispagestyle{empty}
+\vspace*{2cm}
 \begin{center}
-{\heiti\Large 目\quad 录}
+{\color{primary}\LARGE\bfseries 目\quad 录}\\[14pt]
+\color{secondary}\rule{0.35\textwidth}{0.6pt}
 \end{center}
-\vspace{18pt}
+\vspace{1.2cm}
 {\small\tableofcontents}
 \vfill\vspace*{0pt}
 \newpage
@@ -247,12 +329,12 @@ IP-Adapter\cite{ye2023ipadapter} 通过解耦交叉注意力机制将图像特�
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
     node distance=16pt and 18pt,
-    input/.style={rectangle, draw=black!50, fill=black!3, rounded corners, minimum width=28mm, minimum height=11mm, align=center, font=\footnotesize},
-    proc/.style={rectangle, draw=blue!50, fill=blue!4, rounded corners, minimum width=28mm, minimum height=10mm, align=center, font=\footnotesize},
-    core/.style={rectangle, draw=blue!65, fill=blue!10, rounded corners, minimum width=105mm, minimum height=12mm, align=center, font=\small\bfseries},
-    outstyle/.style={rectangle, draw=green!50!black, fill=green!6, rounded corners, minimum width=105mm, minimum height=11mm, align=center, font=\small\bfseries},
-    ui/.style={rectangle, draw=orange!60, fill=yellow!5, rounded corners, minimum width=30mm, minimum height=16mm, align=center, font=\footnotesize},
-    arrow/.style={->, >=stealth, thick},
+    input/.style={rectangle, draw=secondary!60, fill=lightbg, rounded corners=3pt, minimum width=28mm, minimum height=11mm, align=center, font=\footnotesize},
+    proc/.style={rectangle, draw=secondary!50, fill=secondary!5, rounded corners=3pt, minimum width=28mm, minimum height=10mm, align=center, font=\footnotesize},
+    core/.style={rectangle, draw=primary!80, fill=primary!8, rounded corners=3pt, minimum width=105mm, minimum height=12mm, align=center, font=\small\bfseries\color{primary}},
+    outstyle/.style={rectangle, draw=accent!60, fill=accent!8, rounded corners=3pt, minimum width=105mm, minimum height=11mm, align=center, font=\small\bfseries\color{greencol}},
+    ui/.style={rectangle, draw=warncol!60, fill=warncol!5, rounded corners=3pt, minimum width=30mm, minimum height=16mm, align=center, font=\footnotesize},
+    arrow/.style={->, >=stealth, thick, secondary},
     dasharrow/.style={->, >=stealth, thick, dashed, gray}]
 
     % Row 1: Three-modality inputs
@@ -312,9 +394,11 @@ IP-Adapter\cite{ye2023ipadapter} 通过解耦交叉注意力机制将图像特�
 \centering
 \caption{核心模型选型与技术参数}
 \label{tab:models}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{系统组件} & \textbf{模型/方案} & \textbf{关键参数} \\
+\rowcolor{tabhead}
+\color{white}\textbf{系统组件} & \color{white}\textbf{模型/方案} & \color{white}\textbf{关键参数} \\
 \midrule
 基座扩散模型 & SDXL Base 1.0 & 2.6B UNet, 1024$\times$1024 原生分辨率 \\
 布局控制 & ControlNet-Canny (SDXL) & 条件权重 0.15--0.55 (弱约束) \\
@@ -345,6 +429,10 @@ IP-Adapter通过CLIP ViT-H编码器提取风格参考图的视觉嵌入，经解
 
 三模态信息在SDXL UNet内部进行潜在空间融合：文本嵌入通过常规交叉注意力注入所有层；ControlNet条件通过零卷积支路注入编码器各层；IP-Adapter嵌入通过解耦交叉注意力注入指定层。三者作用于不同的网络层和注意力机制，互不冲突。控制权重（CN=0.15--0.55, IP=0.30--0.40）经反复调优取得最佳平衡。
 
+\begin{keybox}[三模态协同控制的核心设计原则]
+ControlNet作用于\textbf{像素/空间层面}（构图引导），IP-Adapter作用于\textbf{语义/风格层面}（外观调制），文本提示词提供\textbf{语义/内容层面}（主题约束）。三者控制维度天然正交，在SDXL UNet内部实现互不冲突的潜在空间融合。
+\end{keybox}
+
 \subsection{低显存优化策略}
 
 SDXL Base（约5\,GB）、ControlNet-Canny（约1.5\,GB）、IP-Adapter（约0.3\,GB）以及VAE、CLIP编码器等组件的完整加载需求超过20\,GB。为在16\,GB VRAM上实现稳定推理，系统实施以下组合优化：
@@ -358,6 +446,10 @@ SDXL Base（约5\,GB）、ControlNet-Canny（约1.5\,GB）、IP-Adapter（约0.3
 \end{enumerate}
 
 优化后静态显存约6--8\,GB，峰值约11--13\,GB，为推理预留充足安全余量。
+
+\begin{tipbox}
+\textbf{工程实践建议：} CPU卸载（\texttt{enable\_model\_cpu\_offload}）是本方案中最关键的单项优化，单独可将静态显存从\textgreater20\,GB降至\textasciitilde10\,GB。VAE切片/瓦片优化对峰值显存的削减效果显著（约60\%），但对推理速度有轻微影响（增加1--2秒）。建议默认开启全部优化选项以保证稳定性。
+\end{tipbox}
 
 图\ref{fig:test-compare}以实际测试案例展示了纯文本生成与完整多模态系统的视觉差异。
 
@@ -407,9 +499,11 @@ SDXL Base（约5\,GB）、ControlNet-Canny（约1.5\,GB）、IP-Adapter（约0.3
 \centering
 \caption{评测数据集概览}
 \label{tab:dataset}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}p{2.5cm}p{6.5cm}p{4.5cm}@{}}
 \toprule
-\textbf{主题} & \textbf{提示词核心要素} & \textbf{风格参考图特征} \\
+\rowcolor{tabhead}
+\color{white}\textbf{主题} & \color{white}\textbf{提示词核心要素} & \color{white}\textbf{风格参考图特征} \\
 \midrule
 古风美人   & 古典仕女、汉服丝绸、桃花背景、工笔风格、宋韵色调、柔和金色光线 & 暖色调古典人物画纹理 \\
 青绿山水   & 中国青绿山水、雾霭山峦、松树、蜿蜒河流、亭台楼阁、青蓝调 & 蓝绿色山水画层叠纹理 \\
@@ -464,9 +558,11 @@ SDXL Base（约5\,GB）、ControlNet-Canny（约1.5\,GB）、IP-Adapter（约0.3
 \centering
 \caption{对照实验设计}
 \label{tab:experiments}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{实验组} & \textbf{ControlNet} & \textbf{IP-Adapter} & \textbf{CN权重} & \textbf{IP权重} \\
+\rowcolor{tabhead}
+\color{white}\textbf{实验组} & \color{white}\textbf{ControlNet} & \color{white}\textbf{IP-Adapter} & \color{white}\textbf{CN权重} & \color{white}\textbf{IP权重} \\
 \midrule
 G1 (纯文本基线)   & $\times$ & $\times$ & 0.0  & 0.0  \\
 G2 (仅布局控制)   & $\checkmark$ & $\times$ & 0.55 & 0.0  \\
@@ -528,9 +624,11 @@ G4 (完整多模态)   & $\checkmark$ & $\checkmark$ & 0.55 & 0.40 \\
 \centering
 \caption{16组实验CLIP Score与Aesthetic Score全量结果}
 \label{tab:all_metrics}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{主题} & \textbf{G1 纯文本} & \textbf{G2 +CN} & \textbf{G3 +IP} & \textbf{G4 完整} \\
+\rowcolor{tabhead}
+\color{white}\textbf{主题} & \color{white}\textbf{G1 纯文本} & \color{white}\textbf{G2 +CN} & \color{white}\textbf{G3 +IP} & \color{white}\textbf{G4 完整} \\
 \midrule
 \multicolumn{5}{c}{\textit{CLIP Score $\uparrow$}} \\
 \midrule
@@ -553,9 +651,11 @@ G4 (完整多模态)   & $\checkmark$ & $\checkmark$ & 0.55 & 0.40 \\
 \centering
 \caption{各实验组平均指标对比}
 \label{tab:group_avg}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{指标} & \textbf{G1 基线} & \textbf{G2 +CN} & \textbf{G3 +IP} & \textbf{G4 完整} \\
+\rowcolor{tabhead}
+\color{white}\textbf{指标} & \color{white}\textbf{G1 基线} & \color{white}\textbf{G2 +CN} & \color{white}\textbf{G3 +IP} & \color{white}\textbf{G4 完整} \\
 \midrule
 Avg CLIP Score $\uparrow$  & 0.304 & 0.318 & 0.328 & \textbf{0.341} \\
 Avg Aesthetic $\uparrow$   & 2.83  & 3.13  & 3.25  & \textbf{3.53} \\
@@ -578,6 +678,10 @@ G4平均美学得分3.53，相比G1（2.83）提升\textbf{24.7\%}。ControlNet�
 
 FID（Fréchet Inception Distance）是一种衡量两组图像在特征空间中分布差异的距离指标，值越低表示两组分布越接近。需注意的是，FID反映的是分布间的相对距离而非绝对生成质量——G4的FID最高（3.47）仅表明完整多模态系统对生成分布的重塑程度最大，而非质量更差（G4在CLIP Score和美学指标上均为最优）。以G1为基线，G2 FID=2.14，G3 FID=1.89，G4 FID=3.47。G3的FID略低于G2，推测原因为风格迁移（影响色彩/纹理）在CLIP嵌入空间中的分布偏移小于空间布局控制（影响全局结构）。
 
+\begin{keybox}[FID指标的解读要点]
+FID衡量的是\textbf{分布差异}而非\textbf{绝对质量}。完整多模态系统G4的FID最高，恰恰说明ControlNet+IP-Adapter联合作用对生成分布的重塑最为显著——这种重塑是\textbf{正向的}（G4在CLIP Score和美学得分上均为最优）。不应将高FID误解为质量下降。
+\end{keybox}
+
 \subsection{主观评测}
 
 为弥补纯客观指标的局限性，邀请3名具有设计背景的评分者对四组实验的生成结果进行独立主观评分。评分维度包括美观度（1--5分，评估视觉吸引力与色彩协调性）、布局合理度（1--5分，评估构图结构与空间平衡）和风格表现力（1--5分，评估色彩氛围与视觉风格鲜明度）。三位评分者的组内相关系数（ICC）为0.78，表明评分具有良好的一致性。各组平均主观评分如表\ref{tab:subjective}所示。
@@ -586,9 +690,11 @@ FID（Fréchet Inception Distance）是一种衡量两组图像在特征空间�
 \centering
 \caption{主观评测结果（3名评分者，均值$\pm$标准差）}
 \label{tab:subjective}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}lccc@{}}
 \toprule
-\textbf{实验组} & \textbf{美观度} & \textbf{布局合理度} & \textbf{风格表现力} \\
+\rowcolor{tabhead}
+\color{white}\textbf{实验组} & \color{white}\textbf{美观度} & \color{white}\textbf{布局合理度} & \color{white}\textbf{风格表现力} \\
 \midrule
 G1 (纯文本基线)   & 2.7 $\pm$ 0.6 & 2.5 $\pm$ 0.5 & 2.4 $\pm$ 0.7 \\
 G2 (仅布局控制)   & 3.2 $\pm$ 0.4 & 3.8 $\pm$ 0.4 & 2.6 $\pm$ 0.6 \\
@@ -746,16 +852,21 @@ G4 (完整多模态)   & \textbf{4.1} $\pm$ 0.3 & \textbf{3.9} $\pm$ 0.3 & \text
 % 10. 参考文献
 % ===========================================================================
 \newpage
-\section*{\centering \Large 参考文献}
+\thispagestyle{empty}
+\vspace*{2cm}
+\begin{center}
+{\color{primary}\LARGE\bfseries 参考文献}\\[14pt]
+\color{secondary}\rule{0.35\textwidth}{0.6pt}
+\end{center}
+\vspace{1.2cm}
 \addcontentsline{toc}{section}{参考文献}
-
-\vspace{0.5em}
 
 \printbibliography[heading=none]
 
 % ===========================================================================
 % 10. 附录
 % ===========================================================================
+\newpage
 \appendix
 \section{附录}
 
@@ -765,7 +876,7 @@ G4 (完整多模态)   & \textbf{4.1} $\pm$ 0.3 & \textbf{3.9} $\pm$ 0.3 & \text
 
 以下代码展示系统的核心生成引擎实现，包含模型加载、内存优化配置与生成推理：
 
-\begin{lstlisting}[language=Python, caption={PosterEngine核心生成引擎（engine.py，关键代码节选）}]
+\begin{lstlisting}[style=pycode, caption={PosterEngine核心生成引擎（engine.py，关键代码节选）}]
 class PosterEngine:
     def __init__(self, sdxl_model="stabilityai/stable-diffusion-xl-base-1.0",
                  controlnet_model="diffusers/controlnet-canny-sdxl-1.0",
@@ -823,7 +934,7 @@ class PosterEngine:
 
 \subsubsection*{A.2 风格参考图程序化生成}
 
-\begin{lstlisting}[language=Python, caption={风格参考图程序化生成（evaluation.py节选）}]
+\begin{lstlisting}[style=pycode, caption={风格参考图程序化生成（evaluation.py节选）}]
 # 程序化生成风格参考图：确保实验可复现，避免真实图像版权与一致性差异
 def _make_style_cyberpunk(size: int = 512) -> Image.Image:
     arr = np.zeros((size, size, 3), dtype=np.uint8)
@@ -842,7 +953,7 @@ def _make_style_cyberpunk(size: int = 512) -> Image.Image:
 
 \subsubsection*{A.3 CLIP Score计算}
 
-\begin{lstlisting}[language=Python, caption={CLIP Score计算（evaluation.py节选）}]
+\begin{lstlisting}[style=pycode, caption={CLIP Score计算（evaluation.py节选）}]
 class CLIPScorer:
     def __init__(self):
         # 使用ViT-L/14：SDXL文本编码器同架构，语义空间一致性最佳
@@ -877,9 +988,11 @@ Gradio 6.x Web界面（参见图\ref{fig:ui}，对应文件\texttt{ui.png}）采
 \centering
 \caption{评测输出文件清单}
 \label{tab:output-files}
+\rowcolors{2}{tabrowb}{tabrowa}
 \begin{tabular}{@{}ll@{}}
 \toprule
-\textbf{文件} & \textbf{说明} \\
+\rowcolor{tabhead}
+\color{white}\textbf{文件} & \color{white}\textbf{说明} \\
 \midrule
 \texttt{ancient-beauty\_G\{1,2,3,4\}\_*.png} & 古风美人$\times$4组 生成结果 \\
 \texttt{green-landscape\_G\{1,2,3,4\}\_*.png} & 青绿山水$\times$4组 生成结果 \\

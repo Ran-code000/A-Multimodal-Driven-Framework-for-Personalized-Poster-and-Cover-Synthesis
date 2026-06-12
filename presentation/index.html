@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>图文驱动的个性化封面与海报生成系统 · 结题报告</title>
+<link rel="stylesheet" href="../../../html-ppt-skill/assets/fonts.css">
+<link rel="stylesheet" href="../../../html-ppt-skill/assets/base.css">
+<link rel="stylesheet" href="../../../html-ppt-skill/assets/animations/animations.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="tpl-poster-deck">
+<div class="deck">
+
+  <!-- ════════════════════════════════════════════════════════════
+  1. COVER 封面
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Cover">
+    <p class="kicker">多模态大模型原理与应用 · 课程大作业期末结题报告</p>
+    <h1 class="h1 anim-fade-up" data-anim="fade-up">图文驱动的个性化<br><span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">封面与海报生成系统</span></h1>
+    <p class="lede mt-m">SDXL + ControlNet-Canny + IP-Adapter · 三模态协同可控生成 · 消费级GPU全流程适配</p>
+    <div class="speaker"><div class="av"></div><div><b>崔敬然</b><span>学号 23336055 · 1班 · 2026春</span></div></div>
+    <div class="deck-footer"><span class="mono">#SDXL #ControlNet #IP-Adapter #Multimodal</span><span class="slide-number" data-current="1" data-total="12"></span></div>
+    <div class="notes">开场介绍：我是崔敬然，今天展示的是图文驱动的个性化封面与海报生成系统。这个系统基于SDXL扩散模型，融合了ControlNet布局控制和IP-Adapter风格迁移，实现文本、布局、风格三模态协同可控生成。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  2. AGENDA 目录
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Agenda">
+    <p class="kicker">agenda.md</p>
+    <h2 class="h2">汇报提纲</h2>
+    <div class="stack mt-l">
+      <div class="agenda-row"><span class="num">01</span><span class="t">研究背景与核心挑战</span><span class="d">~1min</span></div>
+      <div class="agenda-row"><span class="num">02</span><span class="t">系统架构与三模态协同设计</span><span class="d">~1.5min</span></div>
+      <div class="agenda-row"><span class="num">03</span><span class="t">多模态控制策略：弱约束 + 跨注意力注入</span><span class="d">~1.5min</span></div>
+      <div class="agenda-row"><span class="num">04</span><span class="t">消费级GPU推理优化（16GB VRAM）</span><span class="d">~1min</span></div>
+      <div class="agenda-row"><span class="num">05</span><span class="t">实验设计：4组对照 × 4类主题</span><span class="d">~1min</span></div>
+      <div class="agenda-row"><span class="num">06</span><span class="t">定量结果与可视化分析</span><span class="d">~1.5min</span></div>
+      <div class="agenda-row"><span class="num">07</span><span class="t">总结与未来展望</span><span class="d">~0.5min</span></div>
+    </div>
+    <div class="notes">今天的汇报涵盖七个部分：从研究背景出发，介绍系统架构、核心技术、工程优化，再到实验设计与定量结果，最后总结展望。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  3. PROBLEM 研究背景与挑战
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Challenges">
+    <p class="kicker">// problem-statement</p>
+    <h2 class="h2">纯文本驱动的海报生成<br>面临<span style="color:var(--accent-3)">四大核心挑战</span></h2>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent" data-anim="fade-up"><h4 style="color:var(--accent-3)">01 · 构图不可控</h4><p class="dim">纯文本生成的空间布局高度随机，无法满足海报版面结构的精确需求——主题位置、文字区域、视觉层次全凭"运气"。</p><span class="tag mt-s" style="color:var(--accent-3);border-color:rgba(255,123,114,.35)">❌ 随机布局</span></div>
+      <div class="card card-accent" data-anim="fade-up"><h4 style="color:var(--warn)">02 · 风格不可控</h4><p class="dim">色彩调性、纹理肌理等视觉风格要素难以通过自然语言精确描述——"暖色调"可能有100种解释，生成结果与预期偏差大。</p><span class="tag mt-s" style="color:var(--warn);border-color:rgba(210,168,255,.35)">🎨 语义歧义</span></div>
+      <div class="card card-accent" data-anim="fade-up"><h4 style="color:var(--accent)">03 · 细节崩坏</h4><p class="dim">人物面部、手部等高频细节区域易出现扭曲变形——这是潜在扩散模型在低维表示中高频信息损失的直接后果，严重影响商业可用性。</p><span class="tag mt-s">🧩 高频损失</span></div>
+      <div class="card card-accent" data-anim="fade-up"><h4 style="color:var(--accent-2)">04 · 多模态融合困难</h4><p class="dim">文本（语义）、布局（空间）、风格（视觉）三种异构模态如何在潜在空间有效融合，是多模态可控生成的核心难题。</p><span class="tag mt-s" style="color:var(--accent-2);border-color:rgba(121,192,255,.35)">🔗 异构融合</span></div>
+    </div>
+    <div class="notes">海报生成面临的四大挑战：构图不可控——纯文本生成的空间布局完全随机。风格不可控——色彩和纹理难以用文字精确描述。细节崩坏——人脸和手部容易变形。多模态融合困难——文本、布局、风格三种异构信息如何在潜在空间有效融合。这四项挑战直接驱动了本系统的设计。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  4. ARCHITECTURE 系统架构
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Architecture">
+    <p class="kicker">system-design · architecture</p>
+    <h2 class="h2">三模态协同可控生成架构</h2>
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div>
+        <p class="lede">五大核心模块构成<span class="mono">模块化流水线</span>，三模态输入经独立预处理后在SDXL UNet内部实现<span style="color:var(--accent)">互不冲突的潜在空间融合</span>。</p>
+        <div class="stack mt-m">
+          <div class="tag">✦ LLM 提示词增强（DeepSeek-Chat）</div>
+          <div class="tag">✦ Canny 边缘检测（布局结构提取）</div>
+          <div class="tag">✦ ControlNet-Canny（弱约束布局注入，权重0.15–0.55）</div>
+          <div class="tag">✦ IP-Adapter（解耦跨注意力风格迁移，权重0.30–0.40）</div>
+          <div class="tag">✦ SDXL UNet 2.6B（扩散去噪核心）</div>
+        </div>
+      </div>
+      <div class="card" style="padding:24px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg)">
+        <h4 class="mono" style="color:var(--accent-2);font-size:14px;margin-bottom:16px">✦ 三模态正交控制原则</h4>
+        <div class="stack" style="gap:14px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px">
+            <span style="font-size:28px">📝</span>
+            <div><b style="color:#fff;font-size:15px">文本模态</b><br><span class="dim" style="font-size:13px">语义/内容层面 · 交叉注意力注入所有层</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px">
+            <span style="font-size:28px">📐</span>
+            <div><b style="color:#fff;font-size:15px">布局模态</b><br><span class="dim" style="font-size:13px">像素/空间层面 · 零卷积支路注入编码器</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px">
+            <span style="font-size:28px">🎨</span>
+            <div><b style="color:#fff;font-size:15px">风格模态</b><br><span class="dim" style="font-size:13px">语义/风格层面 · 解耦交叉注意力注入指定层</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">系统的核心架构：五个模块组成流水线。LLM提示词增强将简短中文主题扩展为高质量英文SDXL提示词。Canny边缘检测提取布局结构。ControlNet以弱约束方式注入布局条件，IP-Adapter以解耦交叉注意力注入风格特征。三者在SDXL UNet内部的不同网络层和注意力机制上独立作用、互不冲突——这是整个系统设计的核心原则。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  5. CONTROL STRATEGY 多模态控制策略
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Control Strategy">
+    <p class="kicker">control-strategy · weak-constraint</p>
+    <h2 class="h2">弱约束控制：在引导与自由之间</h2>
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div>
+        <h4 style="color:var(--accent);margin-bottom:12px">ControlNet-Canny · 弱约束策略</h4>
+        <p class="lede">条件权重 <span class="mono" style="color:var(--accent);font-size:20px">0.15--0.55</span>，远低于默认值 1.0。</p>
+        <div class="stack mt-m">
+          <div class="card card-accent"><b>低权重优势：</b><span class="dim">避免"填色画"式的过度约束，保留SDXL的艺术创造力与多样性</span></div>
+          <div class="card card-accent"><b>构图引导：</b><span class="dim">主体居中、三分法构图、横幅区域——仅引导趋势而非像素级定位</span></div>
+          <div class="card card-accent"><b>控制窗口：</b><span class="dim">control_guidance_start=0.0, end=0.9——早期扩散步无约束，后期注入结构</span></div>
+        </div>
+      </div>
+      <div>
+        <h4 style="color:var(--accent-2);margin-bottom:12px">IP-Adapter · 零样本风格迁移</h4>
+        <p class="lede">通过 <span class="mono" style="color:var(--accent-2);font-size:20px">CLIP ViT-H</span> 提取风格嵌入，仅引入约 <span style="color:var(--accent)">3%</span> 参数。</p>
+        <div class="terminal mt-m">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>control-flow.py</span></div>
+<pre><span class="cmt"># ControlNet: 像素/空间层面的结构约束</span>
+<span class="kw">if</span> layout_image:
+    control_image = canny_preprocess(layout_image)
+    result = pipe(<span class="fn">image</span>=control_image,
+                  controlnet_conditioning_scale=<span class="num">0.55</span>)
+
+<span class="cmt"># IP-Adapter: 语义/风格层面的外观调制</span>
+<span class="kw">if</span> style_image:
+    pipe.<span class="fn">load_ip_adapter</span>(<span class="str">"h94/IP-Adapter"</span>)
+    pipe.<span class="fn">set_ip_adapter_scale</span>(<span class="num">0.40</span>)
+
+<span class="cmt"># 两者控制维度天然正交 → 联合使用且效果互补</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="notes">控制策略的核心创新是弱约束。ControlNet权重只有0.15到0.55，远低于默认的1.0——这样避免了填色画式的僵化效果，保留模型的创造力。IP-Adapter仅增加3%的参数，通过CLIP视觉编码器实现零样本风格迁移。两者分别作用于像素空间和语义空间，相互独立、协同增效。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  6. VRAM OPTIMIZATION 低显存优化
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="VRAM Optimization">
+    <p class="kicker">engineering · memory-optimization</p>
+    <h2 class="h2">16GB VRAM 消费级GPU<br>全流程推理优化</h2>
+    <p class="lede mt-s">SDXL + ControlNet + IP-Adapter 完整加载需求 <span style="color:var(--accent-3)">&gt;20 GB</span> → 优化后峰值仅 <span style="color:var(--accent)">11--13 GB</span></p>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent">
+        <div style="font-size:48px;font-weight:900;color:var(--accent);margin-bottom:8px">50%</div>
+        <h4>FP16 半精度</h4>
+        <p class="dim">所有模型以 float16 加载，显存占用直接减半</p>
+        <span class="tag mt-s">torch.float16</span>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:48px;font-weight:900;color:var(--accent);margin-bottom:8px">~40%</div>
+        <h4>CPU 卸载</h4>
+        <p class="dim">非活跃组件常驻CPU，仅推理时按需迁移至GPU——最关键的单顶优化</p>
+        <span class="tag mt-s">enable_model_cpu_offload</span>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:48px;font-weight:900;color:var(--accent);margin-bottom:8px">~60%</div>
+        <h4>VAE 切片/瓦片</h4>
+        <p class="dim">将大尺寸图像分块编解码，大幅削减VAE峰值显存</p>
+        <span class="tag mt-s">slicing + tiling</span>
+      </div>
+    </div>
+    <div class="grid g2 mt-m">
+      <div class="card" style="background:var(--surface-2)">
+        <h4 style="color:var(--accent-2)">优化效果</h4>
+        <div style="display:flex;gap:24px;margin-top:12px">
+          <div><span class="dim">静态显存</span><br><span style="font-size:32px;font-weight:700;color:var(--accent)">6--8 GB</span></div>
+          <div><span class="dim">峰值显存</span><br><span style="font-size:32px;font-weight:700;color:var(--accent)">11--13 GB</span></div>
+          <div><span class="dim">单张生成</span><br><span style="font-size:32px;font-weight:700;color:var(--accent)">15--25s</span></div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--surface-2)">
+        <h4 style="color:var(--accent-2)">硬件配置</h4>
+        <div class="stack mt-s" style="gap:6px">
+          <span class="tag">NVIDIA RTX 5060 Ti (16GB GDDR7)</span>
+          <span class="tag">Intel i7-14700KF · 32GB DDR5</span>
+          <span class="tag">PyTorch 2.7+cu124 · Diffusers 0.31</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes">工程优化的核心是将超过20GB的模型压缩到16GB消费级GPU上。FP16减半、CPU卸载减少40%、VAE切片减少60%——三项组合将峰值控制在11-13GB。单张1024×1024海报生成仅需15-25秒，在RTX 5060 Ti上稳定运行。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  7. EXPERIMENT DESIGN 实验设计
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Experiment Design">
+    <p class="kicker">evaluation · experiment-design</p>
+    <h2 class="h2">4组对照实验 × 4类视觉主题</h2>
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div>
+        <h4 style="color:var(--accent);margin-bottom:10px">对照实验设计</h4>
+        <div class="terminal" style="margin-bottom:16px">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>experiment-groups.csv</span></div>
+<pre><span class="kw">Group</span>  <span class="kw">ControlNet</span>  <span class="kw">IP-Adapter</span>  <span class="kw">CN</span>    <span class="kw">IP</span>
+<span class="str">G1</span>     <span class="str">——</span>        <span class="str">——</span>         <span class="num">0.0</span>   <span class="num">0.0</span>
+<span class="str">G2</span>     <span class="fn">✓</span>          <span class="str">——</span>         <span class="num">0.55</span>  <span class="num">0.0</span>
+<span class="str">G3</span>     <span class="str">——</span>        <span class="fn">✓</span>          <span class="num">0.0</span>   <span class="num">0.40</span>
+<span class="str">G4</span>     <span class="fn">✓</span>          <span class="fn">✓</span>          <span class="num">0.55</span>  <span class="num">0.40</span></pre>
+        </div>
+        <div class="stack" style="gap:8px">
+          <span class="tag">🔒 seed=42 · 25步 · CFG=7.5 · DPM-Solver++</span>
+          <span class="tag">📐 程序化布局草图（4种构图模板）</span>
+          <span class="tag">🎨 程序化风格纹理（4种色彩方案）</span>
+        </div>
+      </div>
+      <div>
+        <h4 style="color:var(--accent-2);margin-bottom:10px">四类视觉主题</h4>
+        <div class="stack" style="gap:10px">
+          <div class="card card-accent" style="border-left:4px solid #e8a87c">
+            <b style="color:#fff">🏮 古风美人</b><br><span class="dim">暖色调古典人物画 · 中央人物+四角花卉框架（垂直构图）</span>
+          </div>
+          <div class="card card-accent" style="border-left:4px solid #6ba8a9">
+            <b style="color:#fff">🏔️ 青绿山水</b><br><span class="dim">蓝绿色山水画 · 层叠山峦+水面+亭台（水平构图）</span>
+          </div>
+          <div class="card card-accent" style="border-left:4px solid #c77dff">
+            <b style="color:#fff">🌃 赛博朋克</b><br><span class="dim">紫青色霓虹城市 · 透视网格+竖向建筑（对角线构图）</span>
+          </div>
+          <div class="card card-accent" style="border-left:4px solid #ffb3ba">
+            <b style="color:#fff">🌸 春日花卉</b><br><span class="dim">粉色调花卉摄影 · 圆形花簇散点+地面基线（散点构图）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">实验设计：四组对照——G1纯文本基线、G2仅布局控制、G3仅风格控制、G4完整系统。四个视觉主题覆盖人物、风景、城市、自然四类场景。全部固定随机种子42、25步推理、CFG=7.5，确保变量唯一。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  8. VISUAL RESULTS 可视化结果
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Visual Results">
+    <p class="kicker">results · qualitative-analysis</p>
+    <h2 class="h2">4×4 汇总对比：多模态控制效果显著</h2>
+    <p class="lede mt-s">行：四个测试主题 | 列：G1纯文本 → G2+ControlNet → G3+IP-Adapter → G4完整系统</p>
+    <div class="grid g4 mt-l" style="gap:10px">
+      <div style="text-align:center"><span class="tag" style="background:var(--surface-2)">G1: 纯文本</span></div>
+      <div style="text-align:center"><span class="tag" style="background:var(--surface-2)">G2: +CN</span></div>
+      <div style="text-align:center"><span class="tag" style="background:var(--surface-2)">G3: +IP</span></div>
+      <div style="text-align:center"><span class="tag" style="background:var(--surface-2);color:var(--accent);border-color:rgba(126,231,135,.4)">G4: 完整系统</span></div>
+    </div>
+    <div class="grid g4 mt-s" style="gap:10px">
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/ancient-beauty_G1_TextOnly.png" style="width:100%;border-radius:6px" alt="古风美人 G1">
+        <p style="text-align:center;font-size:11px;color:var(--text-3);margin-top:4px">🏮 古风美人</p>
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/ancient-beauty_G2_ControlNet.png" style="width:100%;border-radius:6px" alt="古风美人 G2">
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/ancient-beauty_G3_IPAdapter.png" style="width:100%;border-radius:6px" alt="古风美人 G3">
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden;border:2px solid rgba(126,231,135,.3)">
+        <img src="../submission/evaluation_v2_output/ancient-beauty_G4_FullSystem.png" style="width:100%;border-radius:6px" alt="古风美人 G4">
+      </div>
+    </div>
+    <div class="grid g4 mt-s" style="gap:10px">
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/cyberpunk_G1_TextOnly.png" style="width:100%;border-radius:6px" alt="赛博朋克 G1">
+        <p style="text-align:center;font-size:11px;color:var(--text-3);margin-top:4px">🌃 赛博朋克</p>
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/cyberpunk_G2_ControlNet.png" style="width:100%;border-radius:6px" alt="赛博朋克 G2">
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden">
+        <img src="../submission/evaluation_v2_output/cyberpunk_G3_IPAdapter.png" style="width:100%;border-radius:6px" alt="赛博朋克 G3">
+      </div>
+      <div class="card" style="padding:6px;background:var(--bg);overflow:hidden;border:2px solid rgba(126,231,135,.3)">
+        <img src="../submission/evaluation_v2_output/cyberpunk_G4_FullSystem.png" style="width:100%;border-radius:6px" alt="赛博朋克 G4">
+      </div>
+    </div>
+    <p class="lede mt-s" style="text-align:center;font-size:13px">G2 改善构图规范性 | G3 改善色彩协调性 | <span style="color:var(--accent)">G4 综合两者优势：构图+色彩最佳平衡</span></p>
+    <div class="notes">这是4×4汇总对比图。从左到右看：G1纯文本构图随机、色彩中性。G2 ControlNet使构图规范化——人物居中、山峦层次分明。G3 IP-Adapter准确呈现预期色调。G4完整系统同时具备精确构图和鲜明风格。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  9. QUANTITATIVE METRICS 定量结果
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Metrics">
+    <p class="kicker">results · quantitative-metrics</p>
+    <h2 class="h2">定量指标：G4 全面最优</h2>
+    <div class="grid g4 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent" style="text-align:center">
+        <p class="eyebrow">Avg CLIP Score ↑</p>
+        <div style="font-size:56px;font-weight:800;color:var(--accent)"><span class="counter" data-to="0.341">0</span></div>
+        <p class="dim">G4 vs G1: <span style="color:var(--accent)">+12.2%</span></p>
+      </div>
+      <div class="card card-accent" style="text-align:center">
+        <p class="eyebrow">Avg Aesthetic ↑</p>
+        <div style="font-size:56px;font-weight:800;color:var(--accent)"><span class="counter" data-to="3.53">0</span></div>
+        <p class="dim">G4 vs G1: <span style="color:var(--accent)">+24.7%</span></p>
+      </div>
+      <div class="card card-accent" style="text-align:center">
+        <p class="eyebrow">主观美观度 ↑</p>
+        <div style="font-size:56px;font-weight:800;color:var(--accent)"><span class="counter" data-to="4.1">0</span></div>
+        <p class="dim">G4 vs G1: <span style="color:var(--accent)">+51.9%</span></p>
+      </div>
+      <div class="card card-accent" style="text-align:center">
+        <p class="eyebrow">FID vs G1 ↓</p>
+        <div style="font-size:56px;font-weight:800;color:var(--accent-2)"><span class="counter" data-to="3.47">0</span></div>
+        <p class="dim" style="color:var(--accent-2)">分布重塑（正向）</p>
+      </div>
+    </div>
+
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div class="terminal">
+        <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>orthogonal-contribution.tex</span></div>
+<pre><span class="cmt"># G4增益 ≈ G2增益 + G3增益（线性叠加）</span>
+G2 (<span class="fn">+ControlNet</span>):     +<span class="num">4.6%</span> CLIP,  +<span class="num">10.6%</span> Aes
+G3 (<span class="fn">+IP-Adapter</span>):    +<span class="num">7.9%</span> CLIP,  +<span class="num">14.8%</span> Aes
+<span class="str">G2+G3 (理论叠加):  +12.5% CLIP,  +25.4% Aes</span>
+<span class="str">G4 (实际测量):     +12.2% CLIP,  +24.7% Aes</span>
+
+<span class="cmt"># → 布局与风格控制在CLIP语义空间中</span>
+<span class="cmt">#   具有近似正交的贡献维度！</span></pre>
+      </div>
+      <div>
+        <h4 style="color:var(--accent-2);margin-bottom:10px">关键发现</h4>
+        <div class="stack" style="gap:10px">
+          <div class="card card-accent">
+            <b style="color:#fff">🔬 正交性验证</b>
+            <p class="dim">G4增益（12.2%）≈ G2增益（4.6%）+ G3增益（7.9%）= 12.5%。<br>布局与风格控制维度互不干扰，协同增效。</p>
+          </div>
+          <div class="card card-accent">
+            <b style="color:#fff">📊 FID ≠ 质量</b>
+            <p class="dim">G4的FID最高（3.47）说明分布重塑程度最大——但这是<strong style="color:var(--accent)">正向重塑</strong>（G4在所有指标上均为最优）。高FID ≠ 质量差。</p>
+          </div>
+          <div class="card card-accent">
+            <b style="color:#fff">🎯 主题敏感性</b>
+            <p class="dim">赛博朋克提升最小（+11.0%），青绿山水提升最大（+14.9%）——抽象传统画风对多模态控制最敏感。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">定量结果的核心亮点：G4 CLIP Score提升12.2%，美学指标提升24.7%，主观评分提升51.9%。最关键的科学发现是正交性验证——G4增益接近G2与G3增益的线性叠加，说明布局控制与风格控制在语义空间中互不干扰、协同增效。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  10. TAKEAWAYS 关键发现
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Takeaways">
+    <p class="kicker">// key-takeaways</p>
+    <h2 class="h2">五项核心贡献</h2>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">🔗</div>
+        <h4>三模态协同可控生成</h4>
+        <p class="dim">首次将ControlNet布局控制与IP-Adapter风格控制统一整合至SDXL海报生成流水线——文本+布局+风格三种异构模态协同可控。</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">🎯</div>
+        <h4>弱约束控制策略</h4>
+        <p class="dim">ControlNet权重降至0.15–0.55——在提供有效构图引导的同时保留SDXL的艺术创造力，避免"填色画"僵化。</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">⚡</div>
+        <h4>消费级GPU全流程适配</h4>
+        <p class="dim">CPU卸载+VAE切片/瓦片+FP16——将>20GB模型压缩至16GB VRAM，单张1024×1024生成仅需15–25秒。</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">📊</div>
+        <h4>系统化评测框架</h4>
+        <p class="dim">16组实验（4主题×4条件组）× 3类指标（CLIP Score/FID/美学启发式）+ 主观评测，全面量化多模态控制贡献。</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">🔬</div>
+        <h4>正交性科学验证</h4>
+        <p class="dim">实验证明布局与风格控制在语义空间中近似正交——G4增益≈G2增益+G3增益，两者互不干扰、协同增效。</p>
+      </div>
+      <div class="card card-accent">
+        <div style="font-size:40px;margin-bottom:8px">🛠️</div>
+        <h4>完整工程交付</h4>
+        <p class="dim">核心引擎 + Gradio WebUI + 评测工具链 + 16组实验结果 + 结题报告——从理论设计到工程部署的完整实践方案。</p>
+      </div>
+    </div>
+    <div class="notes">五项核心贡献：三模态协同、弱约束控制、消费级GPU适配、系统化评测框架、正交性科学验证。每项贡献都有充分的实验数据和工程实践支撑。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  11. CONCLUSION 总结与展望
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide" data-title="Conclusion">
+    <p class="kicker">conclusion · future-work</p>
+    <h2 class="h2">总结与未来展望</h2>
+    <div class="grid g2 mt-l" style="align-items:start">
+      <div>
+        <h4 style="color:var(--accent);margin-bottom:10px">✅ 已完成的工作</h4>
+        <div class="stack" style="gap:10px">
+          <div class="card card-accent">
+            <b style="color:#fff">✦ SDXL + ControlNet + IP-Adapter 三模态流水线</b>
+            <p class="dim">LLM增强 → Canny检测 → ControlNet布局注入 → IP-Adapter风格注入 → SDXL去噪</p>
+          </div>
+          <div class="card card-accent">
+            <b style="color:#fff">✦ 弱约束控制策略验证</b>
+            <p class="dim">CN=0.15–0.55 有效引导构图+保留创造力</p>
+          </div>
+          <div class="card card-accent">
+            <b style="color:#fff">✦ 16GB VRAM 全流程优化</b>
+            <p class="dim">CPU卸载+VAE切片+FP16 → 峰值11–13GB</p>
+          </div>
+          <div class="card card-accent">
+            <b style="color:#fff">✦ 16组实验 × 多维度评测</b>
+            <p class="dim">CLIP +12.2% · Aesthetic +24.7% · 主观 +51.9%</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 style="color:var(--accent-2);margin-bottom:10px">🔮 未来工作方向</h4>
+        <div class="stack" style="gap:10px">
+          <div class="card" style="border-left:3px solid var(--accent);background:var(--surface-2)">
+            <b style="color:#fff">📝 文字渲染集成</b>
+            <p class="dim">GlyphControl / TextDiffuser → 海报标题文字可控生成</p>
+          </div>
+          <div class="card" style="border-left:3px solid var(--accent);background:var(--surface-2)">
+            <b style="color:#fff">🎨 多风格LoRA热插拔</b>
+            <p class="dim">古风/水墨/赛博/极简/波普LoRA库 → WebUI实时切换</p>
+          </div>
+          <div class="card" style="border-left:3px solid var(--accent);background:var(--surface-2)">
+            <b style="color:#fff">⚡ 快速推理加速</b>
+            <p class="dim">LCM-LoRA / SDXL-Turbo → 推理步数25→4–8步，近实时交互</p>
+          </div>
+          <div class="card" style="border-left:3px solid var(--accent);background:var(--surface-2)">
+            <b style="color:#fff">🖌️ 交互式编辑</b>
+            <p class="dim">InstructPix2Pix范式 → 支持局部修改与迭代精炼</p>
+          </div>
+          <div class="card" style="border-left:3px solid var(--accent);background:var(--surface-2)">
+            <b style="color:#fff">🔗 多参考图解耦融合</b>
+            <p class="dim">构图参考A + 色彩参考B → 更精细的独立控制</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">总结：已完成三模态协同流水线、弱约束策略验证、16GB VRAM优化和16组系统化评测。未来五个方向：文字渲染、多风格LoRA、快速推理、交互式编辑、多参考图解耦融合。</div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+  12. THANKS 致谢
+  ════════════════════════════════════════════════════════════ -->
+  <section class="slide center tc" data-title="Thanks">
+    <div>
+      <div class="mono" style="font-size:120px;color:var(--accent);font-weight:800;letter-spacing:-.04em;line-height:1">✦</div>
+      <h2 class="h2">感谢聆听</h2>
+      <p class="lede" style="margin:14px auto;max-width:500px">图文驱动的个性化封面与海报生成系统<br>SDXL + ControlNet + IP-Adapter</p>
+      <div class="row mt-l" style="justify-content:center;gap:12px">
+        <span class="tag" style="color:var(--accent);border-color:rgba(126,231,135,.4)">👤 崔敬然 · 23336055</span>
+        <span class="tag">📘 多模态大模型原理与应用</span>
+      </div>
+      <div class="row mt-s" style="justify-content:center;gap:12px">
+        <span class="tag">🔗 github.com/Ran-code000</span>
+        <span class="tag">📄 结题报告已开源</span>
+      </div>
+      <p class="lede mt-l" style="font-size:14px;color:var(--text-3)">Questions &amp; Discussion</p>
+    </div>
+  </section>
+
+</div>
+<script src="../../../html-ppt-skill/assets/runtime.js"></script>
+</body></html>

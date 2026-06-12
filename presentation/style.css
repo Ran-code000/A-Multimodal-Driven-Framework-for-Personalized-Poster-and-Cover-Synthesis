@@ -1,0 +1,82 @@
+/* poster-deck — 多模态海报生成系统 · 结题报告 PPT
+   Dark tech-sharing style with blue-purple-green gradient accents */
+.tpl-poster-deck{
+  --bg:#0a0e14;--bg-soft:#12171f;--surface:#12171f;--surface-2:#181f2a;
+  --border:rgba(100,140,180,.22);--border-strong:rgba(100,140,180,.4);
+  --text-1:#e2e8f0;--text-2:#8fa4b8;--text-3:#5c7088;
+  --accent:#2dd4bf;--accent-2:#60a5fa;--accent-3:#f87171;
+  --grad:linear-gradient(120deg,#2dd4bf 0%,#60a5fa 50%,#c084fc 100%);
+  --radius:14px;--radius-lg:20px;
+  --shadow:0 20px 60px rgba(0,0,0,.55);
+  --good:var(--accent);--warn:#fbbf24;
+  font-family:'Inter','Noto Sans SC',sans-serif;
+}
+.tpl-poster-deck{background:var(--bg);color:var(--text-1)}
+.tpl-poster-deck .slide{padding:64px 88px;background:var(--bg);color:var(--text-1)}
+.tpl-poster-deck .slide::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(70% 60% at 95% 5%,rgba(45,212,191,.10),transparent 55%),
+  radial-gradient(50% 50% at 5% 95%,rgba(96,165,250,.08),transparent 55%),
+  radial-gradient(40% 40% at 50% 50%,rgba(192,132,252,.04),transparent 60%);
+  pointer-events:none;z-index:0}
+.tpl-poster-deck .slide>*{position:relative;z-index:1}
+
+/* Typography */
+.tpl-poster-deck .h1{font-size:72px;line-height:1.05;font-weight:800;letter-spacing:-.03em;color:#fff}
+.tpl-poster-deck .h2{font-size:50px;font-weight:700;letter-spacing:-.025em;color:#fff;line-height:1.15}
+.tpl-poster-deck h3,.tpl-poster-deck h4{color:#fff}
+.tpl-poster-deck .kicker{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;text-transform:none;letter-spacing:.02em}
+.tpl-poster-deck .kicker::before{content:"> "}
+.tpl-poster-deck .mono{font-family:'JetBrains Mono','IBM Plex Mono',monospace;font-size:13px}
+.tpl-poster-deck .lede{font-size:18px;line-height:1.55;color:var(--text-2)}
+.tpl-poster-deck .dim{color:var(--text-2);font-size:14px;line-height:1.5}
+
+/* Terminal / code blocks */
+.tpl-poster-deck .terminal{background:#010409;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);font-family:'JetBrains Mono','IBM Plex Mono',monospace;font-size:14px;line-height:1.65}
+.tpl-poster-deck .terminal .bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-size:12px;color:var(--text-3)}
+.tpl-poster-deck .terminal .dot{width:11px;height:11px;border-radius:50%}
+.tpl-poster-deck .terminal .dot:nth-child(1){background:#ff5f56}
+.tpl-poster-deck .terminal .dot:nth-child(2){background:#ffbd2e}
+.tpl-poster-deck .terminal .dot:nth-child(3){background:#27c93f}
+.tpl-poster-deck .terminal pre{margin:0;padding:20px 24px;color:#e6edf3;overflow:auto;max-height:380px}
+.tpl-poster-deck .kw{color:#f87171}
+.tpl-poster-deck .fn{color:#c084fc}
+.tpl-poster-deck .str{color:#a5d6ff}
+.tpl-poster-deck .cmt{color:#8b949e;font-style:italic}
+.tpl-poster-deck .num{color:#60a5fa}
+
+/* Cards */
+.tpl-poster-deck .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:none}
+.tpl-poster-deck .card-accent{border-top:3px solid var(--accent)}
+.tpl-poster-deck .card b,.tpl-poster-deck .card h4{font-size:16px;font-weight:600}
+.tpl-poster-deck .eyebrow{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:4px}
+
+/* Tags & pills */
+.tpl-poster-deck .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2)}
+.tpl-poster-deck .pill-accent{background:rgba(45,212,191,.12);color:var(--accent);border-color:rgba(45,212,191,.35)}
+
+/* Agenda rows */
+.tpl-poster-deck .agenda-row{display:flex;align-items:baseline;gap:24px;padding:16px 0;border-bottom:1px dashed var(--border);transition:all .2s}
+.tpl-poster-deck .agenda-row:hover{background:var(--surface-2);margin:0 -12px;padding-left:12px;padding-right:12px;border-radius:8px}
+.tpl-poster-deck .agenda-row .num{color:var(--accent);flex:none;width:44px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
+.tpl-poster-deck .agenda-row .t{color:#fff;font-size:22px;flex:1;font-family:'Inter','Noto Sans SC',sans-serif;font-weight:600}
+.tpl-poster-deck .agenda-row .d{color:var(--text-3);font-size:13px;font-family:'JetBrains Mono',monospace}
+
+/* Speaker */
+.tpl-poster-deck .speaker{display:flex;align-items:center;gap:14px;margin-top:32px}
+.tpl-poster-deck .speaker .av{width:52px;height:52px;border-radius:50%;background:var(--grad)}
+.tpl-poster-deck .speaker b{display:block;color:#fff;font-size:17px}
+.tpl-poster-deck .speaker span{color:var(--text-3);font-size:13px;font-family:'JetBrains Mono',monospace}
+
+/* Grid helpers */
+.tpl-poster-deck .stack{display:flex;flex-direction:column}
+.tpl-poster-deck .row{display:flex;align-items:center;flex-wrap:wrap}
+.tpl-poster-deck .mt-s{margin-top:12px}.tpl-poster-deck .mt-m{margin-top:20px}.tpl-poster-deck .mt-l{margin-top:32px}
+
+/* Image cards */
+.tpl-poster-deck img{display:block}
+
+/* Counter animation support */
+.tpl-poster-deck .counter{font-variant-numeric:tabular-nums}
+
+/* Center slide */
+.tpl-poster-deck .center.tc{display:flex;align-items:center;justify-content:center}
